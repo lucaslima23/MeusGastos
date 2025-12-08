@@ -4,105 +4,159 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Finanças">
+    
+    <link rel="apple-touch-icon" href="icon.png">
+
+    <meta name="theme-color" content="#F2F2F7">
     <title>Meus Gastos</title>
+    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --primary: #007AFF; /* Azul iPhone */
+            --primary: #007AFF;
             --bg: #F2F2F7;
             --card: #FFFFFF;
-            --text: #000000;
+            --text: #1C1C1E;
+            --subtext: #8E8E93;
             --danger: #FF3B30;
+            --input-bg: #EFEFF4;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg);
             margin: 0;
             padding: 20px;
-            padding-bottom: 80px; /* Espaço para o menu inferior */
+            padding-bottom: 90px;
             color: var(--text);
+            -webkit-tap-highlight-color: transparent;
         }
 
-        h1, h2 { text-align: center; }
+        h2 { font-size: 22px; margin-bottom: 15px; font-weight: 700; text-align: center; }
 
-        /* Estilo dos Cards */
         .card {
             background: var(--card);
-            border-radius: 12px;
+            border-radius: 16px;
             padding: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
             margin-bottom: 20px;
         }
 
-        /* Formulários */
+        label { display: block; margin-bottom: 8px; font-weight: 500; font-size: 14px; color: var(--subtext); }
+        
         input, select {
             width: 100%;
-            padding: 12px;
-            margin-bottom: 15px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            font-size: 16px;
-            box-sizing: border-box; /* Garante que padding não estoure largura */
+            padding: 16px;
+            margin-bottom: 20px;
+            border: none;
+            background: var(--input-bg);
+            border-radius: 12px;
+            font-size: 17px;
+            color: var(--text);
+            box-sizing: border-box;
+            outline: none;
+            appearance: none; /* Remove estilo padrão do sistema */
         }
 
-        button {
+        /* Container para alinhar Select e botão de Config */
+        .select-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .select-container select { margin-bottom: 0; }
+        
+        .config-btn {
+            background: var(--input-bg);
+            border: none;
+            border-radius: 12px;
+            width: 54px;
+            height: 54px;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--primary);
+        }
+
+        .btn-primary {
             width: 100%;
-            padding: 15px;
+            padding: 18px;
             background-color: var(--primary);
             color: white;
             border: none;
-            border-radius: 10px;
-            font-size: 18px;
-            font-weight: bold;
+            border-radius: 14px;
+            font-size: 17px;
+            font-weight: 600;
             cursor: pointer;
         }
+        .btn-primary:active { opacity: 0.8; transform: scale(0.98); }
 
-        button:active { opacity: 0.8; }
-
-        /* Navegação (Tabs) */
-        .nav-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background: var(--card);
+        /* Abas e Controle */
+        .segmented-control {
             display: flex;
-            justify-content: space-around;
-            padding: 15px 0;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-            padding-bottom: max(15px, env(safe-area-inset-bottom)); /* Ajuste para iPhone X+ */
+            background: #E5E5EA;
+            padding: 3px;
+            border-radius: 10px;
+            margin-bottom: 20px;
         }
-
-        .nav-item {
-            font-size: 14px;
-            color: #888;
+        .segment-btn {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            background: transparent;
+            font-size: 13px;
             font-weight: 500;
-            text-align: center;
+            border-radius: 8px;
             cursor: pointer;
         }
-
-        .nav-item.active { color: var(--primary); }
-
-        /* Controle de Visibilidade das Abas */
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
+        .segment-btn.active { background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); font-weight: 600; }
 
         /* Tabela */
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th { text-align: left; color: #666; font-size: 12px; padding-bottom: 5px; }
-        td { padding: 8px 0; border-bottom: 1px solid #eee; }
-        .valor { text-align: right; font-weight: bold; }
-        
-        .delete-btn {
-            color: var(--danger);
-            background: none;
-            border: none;
-            padding: 5px;
-            width: auto;
-            font-size: 12px;
+        table { width: 100%; border-collapse: collapse; }
+        td { padding: 12px 0; border-bottom: 1px solid #F2F2F7; }
+        .cat-icon { 
+            display: inline-block; width: 30px; height: 30px; 
+            background: var(--input-bg); border-radius: 8px; 
+            text-align: center; line-height: 30px; margin-right: 10px; font-size: 14px;
         }
+
+        /* Menu Inferior */
+        .nav-bar {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            width: 90%; max-width: 400px;
+            background: rgba(255,255,255,0.9); backdrop-filter: blur(10px);
+            display: flex; justify-content: space-around; padding: 12px 0;
+            border-radius: 25px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); z-index: 100;
+        }
+        .nav-item { font-size: 12px; color: #C7C7CC; font-weight: 600; text-align: center; flex: 1; }
+        .nav-item.active { color: var(--primary); }
+        .nav-icon { font-size: 22px; display: block; margin-bottom: 2px; }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* MODAL DE CATEGORIAS */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 200;
+            display: none; align-items: center; justify-content: center;
+        }
+        .modal-content {
+            background: white; width: 85%; max-width: 350px;
+            border-radius: 16px; padding: 20px;
+            max-height: 80vh; overflow-y: auto;
+        }
+        .cat-list-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 0; border-bottom: 1px solid #eee;
+        }
+        .delete-cat { color: var(--danger); font-weight: bold; padding: 5px 10px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -114,28 +168,29 @@
             <input type="number" id="amount" placeholder="0,00" step="0.01" inputmode="decimal">
             
             <label>Categoria</label>
-            <select id="category">
-                <option value="Alimentação">Alimentação</option>
-                <option value="Transporte">Transporte</option>
-                <option value="Moradia">Moradia</option>
-                <option value="Lazer">Lazer</option>
-                <option value="Saúde">Saúde</option>
-                <option value="Outros">Outros</option>
-            </select>
+            <div class="select-container">
+                <select id="category">
+                    </select>
+                <button class="config-btn" onclick="openCatModal()">⚙️</button>
+            </div>
 
-            <label>Descrição (Opcional)</label>
-            <input type="text" id="description" placeholder="Ex: Almoço">
+            <label>Descrição</label>
+            <input type="text" id="description" placeholder="Ex: Mercado da semana">
 
-            <button onclick="addExpense()">Salvar Gasto</button>
+            <button class="btn-primary" onclick="addExpense()">Adicionar</button>
         </div>
     </div>
 
     <div id="tab-report" class="tab-content">
-        <h2>Relatório</h2>
+        <h2>Relatórios</h2>
+        <div class="segmented-control">
+            <button class="segment-btn" id="btn-month" onclick="setReportMode('month')">Últimos 30 Dias</button>
+            <button class="segment-btn active" id="btn-all" onclick="setReportMode('all')">Total Geral</button>
+        </div>
         
-        <div class="card" style="text-align: center;">
-            <p style="margin:0; color:#666">Total Gasto</p>
-            <h1 id="total-display" style="margin:5px 0; color: var(--primary);">R$ 0,00</h1>
+        <div class="card" style="text-align: center; padding: 30px 20px;">
+            <p style="margin:0; color:var(--subtext); font-size: 14px;">Gasto no Período</p>
+            <h1 id="total-display" style="margin:10px 0; font-size: 36px;">R$ 0,00</h1>
         </div>
 
         <div class="card">
@@ -143,35 +198,107 @@
         </div>
 
         <div class="card">
-            <h3>Histórico Recente</h3>
-            <table id="expense-table">
-                <thead>
-                    <tr>
-                        <th>Categoria</th>
-                        <th style="text-align:right">Valor</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    </tbody>
-            </table>
+            <h3 style="margin-top:0; font-size:16px;">Extrato</h3>
+            <table id="expense-table"><tbody></tbody></table>
         </div>
-        
-        <div style="text-align: center; margin-bottom: 20px;">
-            <button onclick="clearData()" style="background-color: var(--danger); font-size: 14px; padding: 10px;">Apagar Tudo</button>
-        </div>
+
+        <button onclick="clearData()" style="background: transparent; color: var(--danger); border: none; width: 100%; padding: 20px; font-weight: 600;">Zerar Tudo</button>
     </div>
 
     <nav class="nav-bar">
-        <div class="nav-item active" onclick="switchTab('tab-add', this)">➕ Adicionar</div>
-        <div class="nav-item" onclick="switchTab('tab-report', this)">📊 Relatórios</div>
+        <div class="nav-item active" onclick="switchTab('tab-add', this)">
+            <span class="nav-icon">➕</span> Inserir
+        </div>
+        <div class="nav-item" onclick="switchTab('tab-report', this)">
+            <span class="nav-icon">📊</span> Relatórios
+        </div>
     </nav>
 
-    <script>
-        // Inicialização
-        let expenses = JSON.parse(localStorage.getItem('expenses')) || [];
-        let myChart = null;
+    <div id="catModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 style="margin-top:0">Gerenciar Categorias</h3>
+            <p style="font-size:13px; color:#888;">Use emojis para ficar bonito (ex: 🍕 Comida)</p>
+            
+            <div style="display:flex; gap:10px; margin-bottom:15px;">
+                <input type="text" id="new-cat-input" placeholder="Nova Categoria..." style="margin-bottom:0">
+                <button onclick="addNewCategory()" style="background:var(--primary); color:white; border:none; border-radius:10px; width:50px; font-weight:bold;">OK</button>
+            </div>
 
+            <div id="cat-list-container">
+                </div>
+
+            <button onclick="closeCatModal()" style="margin-top:20px; width:100%; padding:15px; background:#E5E5EA; border:none; border-radius:10px; font-weight:600;">Fechar</button>
+        </div>
+    </div>
+
+    <script>
+        // --- DADOS ---
+        let expenses = JSON.parse(localStorage.getItem('expenses')) || [];
+        // Categorias Padrão (se não houver salvas)
+        const defaultCats = ['🍔 Alimentação', '🚗 Transporte', '🏠 Moradia', '🎉 Lazer', '💊 Saúde', '💡 Outros'];
+        let categories = JSON.parse(localStorage.getItem('categories')) || defaultCats;
+        
+        let myChart = null;
+        let reportMode = 'all';
+
+        // --- FUNÇÕES DE CATEGORIA ---
+        function saveCategories() {
+            localStorage.setItem('categories', JSON.stringify(categories));
+            renderCategorySelect();
+        }
+
+        function renderCategorySelect() {
+            const select = document.getElementById('category');
+            select.innerHTML = '';
+            categories.forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat;
+                option.innerText = cat;
+                select.appendChild(option);
+            });
+        }
+
+        function openCatModal() {
+            document.getElementById('catModal').style.display = 'flex';
+            renderCatListModal();
+        }
+        function closeCatModal() {
+            document.getElementById('catModal').style.display = 'none';
+        }
+
+        function renderCatListModal() {
+            const container = document.getElementById('cat-list-container');
+            container.innerHTML = '';
+            categories.forEach((cat, index) => {
+                container.innerHTML += `
+                    <div class="cat-list-item">
+                        <span>${cat}</span>
+                        <span class="delete-cat" onclick="removeCategory(${index})">Excluir</span>
+                    </div>
+                `;
+            });
+        }
+
+        function addNewCategory() {
+            const input = document.getElementById('new-cat-input');
+            const val = input.value.trim();
+            if(val) {
+                categories.push(val);
+                saveCategories();
+                renderCatListModal();
+                input.value = '';
+            }
+        }
+
+        function removeCategory(index) {
+            if(confirm('Remover esta categoria da lista de opções? (Gastos antigos não serão apagados)')) {
+                categories.splice(index, 1);
+                saveCategories();
+                renderCatListModal();
+            }
+        }
+
+        // --- FUNÇÕES PRINCIPAIS ---
         function saveToLocal() {
             localStorage.setItem('expenses', JSON.stringify(expenses));
             updateUI();
@@ -182,121 +309,128 @@
             const category = document.getElementById('category').value;
             const description = document.getElementById('description').value;
 
-            if (!amount || isNaN(amount)) {
-                alert("Por favor, digite um valor válido.");
-                return;
-            }
+            // Extrai o primeiro caractere (provavelmente emoji) para o ícone
+            // Se o usuário não usar emoji, pega a primeira letra
+            const emoji = Array.from(category)[0]; 
 
-            const expense = {
+            if (!amount || isNaN(amount)) { alert("Digite um valor válido"); return; }
+
+            expenses.unshift({
                 id: Date.now(),
-                amount: amount,
-                category: category,
-                description: description,
+                amount,
+                category, // Salva o nome completo da categoria
+                emoji,
+                description,
                 date: new Date().toISOString()
-            };
+            });
 
-            expenses.unshift(expense); // Adiciona no começo da lista
             saveToLocal();
-
-            // Limpar formulário
             document.getElementById('amount').value = '';
             document.getElementById('description').value = '';
-            alert("Gasto salvo!");
+            alert('Gasto salvo!');
         }
 
         function deleteExpense(id) {
-            if(confirm("Deseja excluir este gasto?")) {
+            if(confirm("Excluir item?")) {
                 expenses = expenses.filter(e => e.id !== id);
                 saveToLocal();
             }
         }
 
         function clearData() {
-            if(confirm("Tem certeza que quer apagar TUDO?")) {
+            if(confirm("Apagar TODO o histórico?")) {
                 expenses = [];
                 saveToLocal();
             }
         }
 
+        function setReportMode(mode) {
+            reportMode = mode;
+            document.getElementById('btn-all').className = mode === 'all' ? 'segment-btn active' : 'segment-btn';
+            document.getElementById('btn-month').className = mode === 'month' ? 'segment-btn active' : 'segment-btn';
+            updateUI();
+        }
+
         function updateUI() {
-            // 1. Atualizar Tabela
+            let filteredData = expenses;
+            
+            if (reportMode === 'month') {
+                const limitDate = new Date();
+                limitDate.setDate(limitDate.getDate() - 30);
+                filteredData = expenses.filter(e => new Date(e.date) >= limitDate);
+            }
+
             const tbody = document.querySelector('#expense-table tbody');
             tbody.innerHTML = '';
             
             let total = 0;
             const categoryTotals = {};
 
-            expenses.forEach(exp => {
+            filteredData.forEach(exp => {
                 total += exp.amount;
-                
-                // Soma por categoria para o gráfico
+                // Agrupa pelo nome da categoria (mesmo se ela foi excluída da lista de opções)
                 if (!categoryTotals[exp.category]) categoryTotals[exp.category] = 0;
                 categoryTotals[exp.category] += exp.amount;
 
-                // Linha da tabela
-                const row = `<tr>
+                const dateObj = new Date(exp.date);
+                const dateStr = `${dateObj.getDate()}/${dateObj.getMonth()+1}`;
+
+                tbody.innerHTML += `
+                <tr>
                     <td>
-                        <div style="font-weight:bold">${exp.category}</div>
-                        <div style="font-size:10px; color:#888">${exp.description || ''}</div>
+                        <div style="display:flex; align-items:center;">
+                            <span class="cat-icon">${exp.emoji || '💰'}</span>
+                            <div>
+                                <div style="font-weight:600; font-size:15px;">${exp.category}</div>
+                                <div style="font-size:12px; color:var(--subtext)">${dateStr} - ${exp.description}</div>
+                            </div>
+                        </div>
                     </td>
-                    <td class="valor">R$ ${exp.amount.toFixed(2)}</td>
-                    <td style="text-align:right"><button class="delete-btn" onclick="deleteExpense(${exp.id})">🗑️</button></td>
+                    <td style="text-align:right; font-weight:600;">R$ ${exp.amount.toFixed(2)}</td>
+                    <td style="width:30px; text-align:right;">
+                        <span onclick="deleteExpense(${exp.id})" style="color:#FF3B30; font-size:18px; cursor:pointer;">&times;</span>
+                    </td>
                 </tr>`;
-                tbody.innerHTML += row;
             });
 
-            // 2. Atualizar Total Geral
             document.getElementById('total-display').innerText = `R$ ${total.toFixed(2)}`;
-
-            // 3. Atualizar Gráfico
             renderChart(categoryTotals);
         }
 
         function renderChart(dataObj) {
             const ctx = document.getElementById('expenseChart').getContext('2d');
-            const labels = Object.keys(dataObj);
-            const data = Object.values(dataObj);
-
-            // Destruir gráfico anterior se existir para criar um novo
             if (myChart) myChart.destroy();
+            if(Object.keys(dataObj).length === 0) return;
 
             myChart = new Chart(ctx, {
-                type: 'doughnut', // Gráfico de Rosca/Pizza
+                type: 'doughnut',
                 data: {
-                    labels: labels,
+                    labels: Object.keys(dataObj),
                     datasets: [{
-                        data: data,
-                        backgroundColor: [
-                            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'
-                        ],
-                        borderWidth: 1
+                        data: Object.values(dataObj),
+                        backgroundColor: ['#007AFF', '#34C759', '#FF9500', '#FF2D55', '#AF52DE', '#5856D6', '#A2845E', '#8E8E93'],
+                        borderWidth: 0
                     }]
                 },
                 options: {
                     responsive: true,
-                    plugins: {
-                        legend: { position: 'bottom' }
-                    }
+                    cutout: '70%',
+                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, usePointStyle: true } } }
                 }
             });
         }
 
-        // Sistema de Abas
         function switchTab(tabId, element) {
-            // Esconder todas as abas
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-
-            // Mostrar a selecionada
             document.getElementById(tabId).classList.add('active');
             element.classList.add('active');
-
-            // Se for aba de relatório, atualiza os dados
             if(tabId === 'tab-report') updateUI();
         }
 
-        // Carregar dados ao iniciar (opcional, mas bom pra debug)
-        // updateUI(); 
+        // Inicialização
+        renderCategorySelect();
+        setReportMode('month');
     </script>
 </body>
 </html>
