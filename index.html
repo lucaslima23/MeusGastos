@@ -3,16 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Finanças">
+    <link rel="apple-touch-icon" href="icon.png"> <meta name="theme-color" content="#F2F2F7">
     
-    <link rel="apple-touch-icon" href="icon.png">
-
-    <meta name="theme-color" content="#F2F2F7">
     <title>Meus Gastos</title>
-    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
     <style>
         :root {
             --primary: #007AFF;
@@ -57,66 +56,36 @@
             color: var(--text);
             box-sizing: border-box;
             outline: none;
-            appearance: none; /* Remove estilo padrão do sistema */
+            appearance: none;
         }
 
-        /* Container para alinhar Select e botão de Config */
-        .select-container {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            margin-bottom: 20px;
-        }
+        .select-container { display: flex; gap: 10px; align-items: center; margin-bottom: 20px; }
         .select-container select { margin-bottom: 0; }
         
         .config-btn {
-            background: var(--input-bg);
-            border: none;
-            border-radius: 12px;
-            width: 54px;
-            height: 54px;
-            font-size: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            color: var(--primary);
+            background: var(--input-bg); border: none; border-radius: 12px;
+            width: 54px; height: 54px; font-size: 24px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; color: var(--primary);
         }
 
         .btn-primary {
-            width: 100%;
-            padding: 18px;
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 14px;
-            font-size: 17px;
-            font-weight: 600;
-            cursor: pointer;
+            width: 100%; padding: 18px; background-color: var(--primary); color: white;
+            border: none; border-radius: 14px; font-size: 17px; font-weight: 600; cursor: pointer;
         }
         .btn-primary:active { opacity: 0.8; transform: scale(0.98); }
 
-        /* Abas e Controle */
+        /* Controle de Abas (30 dias vs Total) */
         .segmented-control {
-            display: flex;
-            background: #E5E5EA;
-            padding: 3px;
-            border-radius: 10px;
-            margin-bottom: 20px;
+            display: flex; background: #E5E5EA; padding: 3px; border-radius: 10px; margin-bottom: 20px;
         }
         .segment-btn {
-            flex: 1;
-            padding: 8px;
-            border: none;
-            background: transparent;
-            font-size: 13px;
-            font-weight: 500;
-            border-radius: 8px;
-            cursor: pointer;
+            flex: 1; padding: 8px; border: none; background: transparent;
+            font-size: 13px; font-weight: 500; border-radius: 8px; cursor: pointer;
         }
         .segment-btn.active { background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); font-weight: 600; }
 
-        /* Tabela */
+        /* Tabela de Extrato */
         table { width: 100%; border-collapse: collapse; }
         td { padding: 12px 0; border-bottom: 1px solid #F2F2F7; }
         .cat-icon { 
@@ -124,6 +93,14 @@
             background: var(--input-bg); border-radius: 8px; 
             text-align: center; line-height: 30px; margin-right: 10px; font-size: 14px;
         }
+
+        /* LEGENDA DETALHADA DO GRÁFICO */
+        .chart-legend { margin-top: 20px; border-top: 1px solid #F2F2F7; padding-top: 10px; }
+        .legend-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; font-size: 14px; }
+        .legend-left { display: flex; align-items: center; }
+        .color-dot { width: 10px; height: 10px; border-radius: 50%; margin-right: 10px; }
+        .legend-percent { font-weight: 600; color: var(--subtext); width: 45px; text-align: right; }
+        .legend-value { font-weight: 600; margin-left: 10px; min-width: 80px; text-align: right; }
 
         /* Menu Inferior */
         .nav-bar {
@@ -141,21 +118,15 @@
         .tab-content.active { display: block; animation: fadeIn 0.3s; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* MODAL DE CATEGORIAS */
+        /* Modal */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); z-index: 200;
-            display: none; align-items: center; justify-content: center;
+            background: rgba(0,0,0,0.5); z-index: 200; display: none; align-items: center; justify-content: center;
         }
         .modal-content {
-            background: white; width: 85%; max-width: 350px;
-            border-radius: 16px; padding: 20px;
-            max-height: 80vh; overflow-y: auto;
+            background: white; width: 85%; max-width: 350px; border-radius: 16px; padding: 20px; max-height: 80vh; overflow-y: auto;
         }
-        .cat-list-item {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 10px 0; border-bottom: 1px solid #eee;
-        }
+        .cat-list-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; }
         .delete-cat { color: var(--danger); font-weight: bold; padding: 5px 10px; cursor: pointer; }
     </style>
 </head>
@@ -169,8 +140,7 @@
             
             <label>Categoria</label>
             <div class="select-container">
-                <select id="category">
-                    </select>
+                <select id="category"></select>
                 <button class="config-btn" onclick="openCatModal()">⚙️</button>
             </div>
 
@@ -194,11 +164,14 @@
         </div>
 
         <div class="card">
-            <canvas id="expenseChart"></canvas>
+            <div style="max-width: 250px; margin: 0 auto;">
+                <canvas id="expenseChart"></canvas>
+            </div>
+            <div id="custom-legend" class="chart-legend"></div>
         </div>
 
         <div class="card">
-            <h3 style="margin-top:0; font-size:16px;">Extrato</h3>
+            <h3 style="margin-top:0; font-size:16px;">Extrato Detalhado</h3>
             <table id="expense-table"><tbody></tbody></table>
         </div>
 
@@ -217,16 +190,11 @@
     <div id="catModal" class="modal-overlay">
         <div class="modal-content">
             <h3 style="margin-top:0">Gerenciar Categorias</h3>
-            <p style="font-size:13px; color:#888;">Use emojis para ficar bonito (ex: 🍕 Comida)</p>
-            
             <div style="display:flex; gap:10px; margin-bottom:15px;">
                 <input type="text" id="new-cat-input" placeholder="Nova Categoria..." style="margin-bottom:0">
                 <button onclick="addNewCategory()" style="background:var(--primary); color:white; border:none; border-radius:10px; width:50px; font-weight:bold;">OK</button>
             </div>
-
-            <div id="cat-list-container">
-                </div>
-
+            <div id="cat-list-container"></div>
             <button onclick="closeCatModal()" style="margin-top:20px; width:100%; padding:15px; background:#E5E5EA; border:none; border-radius:10px; font-weight:600;">Fechar</button>
         </div>
     </div>
@@ -234,19 +202,19 @@
     <script>
         // --- DADOS ---
         let expenses = JSON.parse(localStorage.getItem('expenses')) || [];
-        // Categorias Padrão (se não houver salvas)
         const defaultCats = ['🍔 Alimentação', '🚗 Transporte', '🏠 Moradia', '🎉 Lazer', '💊 Saúde', '💡 Outros'];
         let categories = JSON.parse(localStorage.getItem('categories')) || defaultCats;
-        
         let myChart = null;
         let reportMode = 'all';
+
+        // Cores fixas para ficar consistente
+        const chartColors = ['#007AFF', '#34C759', '#FF9500', '#FF2D55', '#AF52DE', '#5856D6', '#A2845E', '#8E8E93', '#FFCC00', '#00C7BE'];
 
         // --- FUNÇÕES DE CATEGORIA ---
         function saveCategories() {
             localStorage.setItem('categories', JSON.stringify(categories));
             renderCategorySelect();
         }
-
         function renderCategorySelect() {
             const select = document.getElementById('category');
             select.innerHTML = '';
@@ -257,92 +225,44 @@
                 select.appendChild(option);
             });
         }
-
-        function openCatModal() {
-            document.getElementById('catModal').style.display = 'flex';
-            renderCatListModal();
-        }
-        function closeCatModal() {
-            document.getElementById('catModal').style.display = 'none';
-        }
-
+        function openCatModal() { document.getElementById('catModal').style.display = 'flex'; renderCatListModal(); }
+        function closeCatModal() { document.getElementById('catModal').style.display = 'none'; }
         function renderCatListModal() {
             const container = document.getElementById('cat-list-container');
             container.innerHTML = '';
             categories.forEach((cat, index) => {
-                container.innerHTML += `
-                    <div class="cat-list-item">
-                        <span>${cat}</span>
-                        <span class="delete-cat" onclick="removeCategory(${index})">Excluir</span>
-                    </div>
-                `;
+                container.innerHTML += `<div class="cat-list-item"><span>${cat}</span><span class="delete-cat" onclick="removeCategory(${index})">Excluir</span></div>`;
             });
         }
-
         function addNewCategory() {
-            const input = document.getElementById('new-cat-input');
-            const val = input.value.trim();
-            if(val) {
-                categories.push(val);
-                saveCategories();
-                renderCatListModal();
-                input.value = '';
-            }
+            const val = document.getElementById('new-cat-input').value.trim();
+            if(val) { categories.push(val); saveCategories(); renderCatListModal(); document.getElementById('new-cat-input').value=''; }
         }
-
         function removeCategory(index) {
-            if(confirm('Remover esta categoria da lista de opções? (Gastos antigos não serão apagados)')) {
-                categories.splice(index, 1);
-                saveCategories();
-                renderCatListModal();
-            }
+            if(confirm('Remover esta categoria?')) { categories.splice(index, 1); saveCategories(); renderCatListModal(); }
         }
 
         // --- FUNÇÕES PRINCIPAIS ---
-        function saveToLocal() {
-            localStorage.setItem('expenses', JSON.stringify(expenses));
-            updateUI();
-        }
+        function saveToLocal() { localStorage.setItem('expenses', JSON.stringify(expenses)); updateUI(); }
 
         function addExpense() {
             const amount = parseFloat(document.getElementById('amount').value);
             const category = document.getElementById('category').value;
             const description = document.getElementById('description').value;
-
-            // Extrai o primeiro caractere (provavelmente emoji) para o ícone
-            // Se o usuário não usar emoji, pega a primeira letra
             const emoji = Array.from(category)[0]; 
 
             if (!amount || isNaN(amount)) { alert("Digite um valor válido"); return; }
 
-            expenses.unshift({
-                id: Date.now(),
-                amount,
-                category, // Salva o nome completo da categoria
-                emoji,
-                description,
-                date: new Date().toISOString()
-            });
-
+            expenses.unshift({ id: Date.now(), amount, category, emoji, description, date: new Date().toISOString() });
             saveToLocal();
+            
             document.getElementById('amount').value = '';
             document.getElementById('description').value = '';
             alert('Gasto salvo!');
         }
 
-        function deleteExpense(id) {
-            if(confirm("Excluir item?")) {
-                expenses = expenses.filter(e => e.id !== id);
-                saveToLocal();
-            }
-        }
-
-        function clearData() {
-            if(confirm("Apagar TODO o histórico?")) {
-                expenses = [];
-                saveToLocal();
-            }
-        }
+        function deleteExpense(id) { if(confirm("Excluir item?")) { expenses = expenses.filter(e => e.id !== id); saveToLocal(); } }
+        function clearData() { if(confirm("Apagar TODO o histórico?")) { expenses = []; saveToLocal(); } }
 
         function setReportMode(mode) {
             reportMode = mode;
@@ -353,7 +273,6 @@
 
         function updateUI() {
             let filteredData = expenses;
-            
             if (reportMode === 'month') {
                 const limitDate = new Date();
                 limitDate.setDate(limitDate.getDate() - 30);
@@ -368,7 +287,6 @@
 
             filteredData.forEach(exp => {
                 total += exp.amount;
-                // Agrupa pelo nome da categoria (mesmo se ela foi excluída da lista de opções)
                 if (!categoryTotals[exp.category]) categoryTotals[exp.category] = 0;
                 categoryTotals[exp.category] += exp.amount;
 
@@ -387,35 +305,68 @@
                         </div>
                     </td>
                     <td style="text-align:right; font-weight:600;">R$ ${exp.amount.toFixed(2)}</td>
-                    <td style="width:30px; text-align:right;">
-                        <span onclick="deleteExpense(${exp.id})" style="color:#FF3B30; font-size:18px; cursor:pointer;">&times;</span>
-                    </td>
+                    <td style="width:30px; text-align:right;"><span onclick="deleteExpense(${exp.id})" style="color:#FF3B30; cursor:pointer;">&times;</span></td>
                 </tr>`;
             });
 
             document.getElementById('total-display').innerText = `R$ ${total.toFixed(2)}`;
-            renderChart(categoryTotals);
+            renderChart(categoryTotals, total);
         }
 
-        function renderChart(dataObj) {
+        function renderChart(dataObj, totalGeral) {
             const ctx = document.getElementById('expenseChart').getContext('2d');
+            const legendContainer = document.getElementById('custom-legend');
+            
             if (myChart) myChart.destroy();
-            if(Object.keys(dataObj).length === 0) return;
+            legendContainer.innerHTML = '';
+
+            const labels = Object.keys(dataObj);
+            const data = Object.values(dataObj);
+            
+            if(labels.length === 0) return;
+
+            // Ordenar dados do maior para o menor para a legenda ficar bonita
+            const sortedIndices = data.map((val, i) => ({val, i})).sort((a,b) => b.val - a.val);
+            const sortedLabels = sortedIndices.map(item => labels[item.i]);
+            const sortedData = sortedIndices.map(item => data[item.i]);
+            // Ajustar cores para bater com a ordem
+            const sortedColors = sortedIndices.map((item, i) => chartColors[i % chartColors.length]);
+
+            // Criar a Legenda HTML Customizada
+            sortedLabels.forEach((label, i) => {
+                const val = sortedData[i];
+                const percent = totalGeral > 0 ? ((val / totalGeral) * 100).toFixed(1) + '%' : '0%';
+                
+                legendContainer.innerHTML += `
+                <div class="legend-item">
+                    <div class="legend-left">
+                        <div class="color-dot" style="background-color: ${sortedColors[i]}"></div>
+                        <span>${label}</span>
+                    </div>
+                    <div style="display:flex;">
+                        <span class="legend-percent">${percent}</span>
+                        <span class="legend-value">R$ ${val.toFixed(2)}</span>
+                    </div>
+                </div>`;
+            });
 
             myChart = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: Object.keys(dataObj),
+                    labels: sortedLabels,
                     datasets: [{
-                        data: Object.values(dataObj),
-                        backgroundColor: ['#007AFF', '#34C759', '#FF9500', '#FF2D55', '#AF52DE', '#5856D6', '#A2845E', '#8E8E93'],
+                        data: sortedData,
+                        backgroundColor: sortedColors,
                         borderWidth: 0
                     }]
                 },
                 options: {
                     responsive: true,
-                    cutout: '70%',
-                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, usePointStyle: true } } }
+                    cutout: '65%',
+                    plugins: {
+                        legend: { display: false }, // Desativa legenda padrão
+                        tooltip: { enabled: true }
+                    }
                 }
             });
         }
@@ -428,7 +379,6 @@
             if(tabId === 'tab-report') updateUI();
         }
 
-        // Inicialização
         renderCategorySelect();
         setReportMode('month');
     </script>
