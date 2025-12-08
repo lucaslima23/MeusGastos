@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Meus Gastos</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #007AFF; /* Azul iPhone */
+            --bg: #F2F2F7;
+            --card: #FFFFFF;
+            --text: #000000;
+            --danger: #FF3B30;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            padding: 20px;
+            padding-bottom: 80px; /* Espaço para o menu inferior */
+            color: var(--text);
+        }
+
+        h1, h2 { text-align: center; }
+
+        /* Estilo dos Cards */
+        .card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        /* Formulários */
+        input, select {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box; /* Garante que padding não estoure largura */
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:active { opacity: 0.8; }
+
+        /* Navegação (Tabs) */
+        .nav-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: var(--card);
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 0;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            padding-bottom: max(15px, env(safe-area-inset-bottom)); /* Ajuste para iPhone X+ */
+        }
+
+        .nav-item {
+            font-size: 14px;
+            color: #888;
+            font-weight: 500;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .nav-item.active { color: var(--primary); }
+
+        /* Controle de Visibilidade das Abas */
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* Tabela */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { text-align: left; color: #666; font-size: 12px; padding-bottom: 5px; }
+        td { padding: 8px 0; border-bottom: 1px solid #eee; }
+        .valor { text-align: right; font-weight: bold; }
+        
+        .delete-btn {
+            color: var(--danger);
+            background: none;
+            border: none;
+            padding: 5px;
+            width: auto;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="tab-add" class="tab-content active">
+        <h2>Novo Gasto</h2>
+        <div class="card">
+            <label>Valor (R$)</label>
+            <input type="number" id="amount" placeholder="0,00" step="0.01" inputmode="decimal">
+            
+            <label>Categoria</label>
+            <select id="category">
+                <option value="Alimentação">Alimentação</option>
+                <option value="Transporte">Transporte</option>
+                <option value="Moradia">Moradia</option>
+                <option value="Lazer">Lazer</option>
+                <option value="Saúde">Saúde</option>
+                <option value="Outros">Outros</option>
+            </select>
+
+            <label>Descrição (Opcional)</label>
+            <input type="text" id="description" placeholder="Ex: Almoço">
+
+            <button onclick="addExpense()">Salvar Gasto</button>
+        </div>
+    </div>
+
+    <div id="tab-report" class="tab-content">
+        <h2>Relatório</h2>
+        
+        <div class="card" style="text-align: center;">
+            <p style="margin:0; color:#666">Total Gasto</p>
+            <h1 id="total-display" style="margin:5px 0; color: var(--primary);">R$ 0,00</h1>
+        </div>
+
+        <div class="card">
+            <canvas id="expenseChart"></canvas>
+        </div>
+
+        <div class="card">
+            <h3>Histórico Recente</h3>
+            <table id="expense-table">
+                <thead>
+                    <tr>
+                        <th>Categoria</th>
+                        <th style="text-align:right">Valor</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    </tbody>
+            </table>
+        </div>
+        
+        <div style="text-align: center; margin-bottom: 20px;">
+            <button onclick="clearData()" style="background-color: var(--danger); font-size: 14px; padding: 10px;">Apagar Tudo</button>
+        </div>
+    </div>
+
+    <nav class="nav-bar">
+        <div class="nav-item active" onclick="switchTab('tab-add', this)">➕ Adicionar</div>
+        <div class="nav-item" onclick="switchTab('tab-report', this)">📊 Relatórios</div>
+    </nav>
+
+    <script>
+        // Inicialização
+        let expenses = JSON.parse(localStorage.getItem('expenses')) || [];
+        let myChart = null;
+
+        function saveToLocal() {
+            localStorage.setItem('expenses', JSON.stringify(expenses));
+            updateUI();
+        }
+
+        function addExpense() {
+            const amount = parseFloat(document.getElementById('amount').value);
+            const category = document.getElementById('category').value;
+            const description = document.getElementById('description').value;
+
+            if (!amount || isNaN(amount)) {
+                alert("Por favor, digite um valor válido.");
+                return;
+            }
+
+            const expense = {
+                id: Date.now(),
+                amount: amount,
+                category: category,
+                description: description,
+                date: new Date().toISOString()
+            };
+
+            expenses.unshift(expense); // Adiciona no começo da lista
+            saveToLocal();
+
+            // Limpar formulário
+            document.getElementById('amount').value = '';
+            document.getElementById('description').value = '';
+            alert("Gasto salvo!");
+        }
+
+        function deleteExpense(id) {
+            if(confirm("Deseja excluir este gasto?")) {
+                expenses = expenses.filter(e => e.id !== id);
+                saveToLocal();
+            }
+        }
+
+        function clearData() {
+            if(confirm("Tem certeza que quer apagar TUDO?")) {
+                expenses = [];
+                saveToLocal();
+            }
+        }
+
+        function updateUI() {
+            // 1. Atualizar Tabela
+            const tbody = document.querySelector('#expense-table tbody');
+            tbody.innerHTML = '';
+            
+            let total = 0;
+            const categoryTotals = {};
+
+            expenses.forEach(exp => {
+                total += exp.amount;
+                
+                // Soma por categoria para o gráfico
+                if (!categoryTotals[exp.category]) categoryTotals[exp.category] = 0;
+                categoryTotals[exp.category] += exp.amount;
+
+                // Linha da tabela
+                const row = `<tr>
+                    <td>
+                        <div style="font-weight:bold">${exp.category}</div>
+                        <div style="font-size:10px; color:#888">${exp.description || ''}</div>
+                    </td>
+                    <td class="valor">R$ ${exp.amount.toFixed(2)}</td>
+                    <td style="text-align:right"><button class="delete-btn" onclick="deleteExpense(${exp.id})">🗑️</button></td>
+                </tr>`;
+                tbody.innerHTML += row;
+            });
+
+            // 2. Atualizar Total Geral
+            document.getElementById('total-display').innerText = `R$ ${total.toFixed(2)}`;
+
+            // 3. Atualizar Gráfico
+            renderChart(categoryTotals);
+        }
+
+        function renderChart(dataObj) {
+            const ctx = document.getElementById('expenseChart').getContext('2d');
+            const labels = Object.keys(dataObj);
+            const data = Object.values(dataObj);
+
+            // Destruir gráfico anterior se existir para criar um novo
+            if (myChart) myChart.destroy();
+
+            myChart = new Chart(ctx, {
+                type: 'doughnut', // Gráfico de Rosca/Pizza
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: [
+                            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        }
+
+        // Sistema de Abas
+        function switchTab(tabId, element) {
+            // Esconder todas as abas
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+            // Mostrar a selecionada
+            document.getElementById(tabId).classList.add('active');
+            element.classList.add('active');
+
+            // Se for aba de relatório, atualiza os dados
+            if(tabId === 'tab-report') updateUI();
+        }
+
+        // Carregar dados ao iniciar (opcional, mas bom pra debug)
+        // updateUI(); 
+    </script>
+</body>
+</html>
