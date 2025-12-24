@@ -7,19 +7,21 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Finanças">
-    <link rel="apple-touch-icon" href="icon.png"> <meta name="theme-color" content="#F2F2F7">
+    <link rel="apple-touch-icon" href="icon.png">
+    <meta name="theme-color" content="#F2F2F7">
     
-    <title>Meus Gastos</title>
+    <title>Minhas Finanças</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
         :root {
             --primary: #007AFF;
+            --success: #34C759;
+            --danger: #FF3B30;
             --bg: #F2F2F7;
             --card: #FFFFFF;
             --text: #1C1C1E;
             --subtext: #8E8E93;
-            --danger: #FF3B30;
             --input-bg: #EFEFF4;
         }
 
@@ -28,12 +30,13 @@
             background-color: var(--bg);
             margin: 0;
             padding: 20px;
-            padding-bottom: 90px;
+            padding-bottom: 100px; /* Espaço extra para menu maior */
             color: var(--text);
             -webkit-tap-highlight-color: transparent;
         }
 
         h2 { font-size: 22px; margin-bottom: 15px; font-weight: 700; text-align: center; }
+        h3 { margin-top: 0; font-size: 16px; font-weight: 600; }
 
         .card {
             background: var(--card);
@@ -43,20 +46,33 @@
             margin-bottom: 20px;
         }
 
+        /* DASHBOARD CARD */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .dash-item {
+            background: var(--input-bg);
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .dash-label { font-size: 12px; color: var(--subtext); margin-bottom: 5px; font-weight: 600; text-transform: uppercase; }
+        .dash-value { font-size: 16px; font-weight: 700; }
+        .dash-total { grid-column: span 2; background: var(--card); border: 2px solid var(--input-bg); }
+        .val-green { color: var(--success); }
+        .val-red { color: var(--danger); }
+        .val-blue { color: var(--primary); }
+
+        /* INPUTS */
         label { display: block; margin-bottom: 8px; font-weight: 500; font-size: 14px; color: var(--subtext); }
         
         input, select {
-            width: 100%;
-            padding: 16px;
-            margin-bottom: 20px;
-            border: none;
-            background: var(--input-bg);
-            border-radius: 12px;
-            font-size: 17px;
-            color: var(--text);
-            box-sizing: border-box;
-            outline: none;
-            appearance: none;
+            width: 100%; padding: 16px; margin-bottom: 20px; border: none;
+            background: var(--input-bg); border-radius: 12px; font-size: 17px;
+            color: var(--text); box-sizing: border-box; outline: none; appearance: none;
         }
 
         .select-container { display: flex; gap: 10px; align-items: center; margin-bottom: 20px; }
@@ -69,23 +85,19 @@
             cursor: pointer; color: var(--primary);
         }
 
+        /* BOTÕES */
         .btn-primary {
             width: 100%; padding: 18px; background-color: var(--primary); color: white;
             border: none; border-radius: 14px; font-size: 17px; font-weight: 600; cursor: pointer;
         }
-        .btn-primary:active { opacity: 0.8; transform: scale(0.98); }
+        .btn-success { background-color: var(--success); }
+        .btn-primary:active, .btn-success:active { opacity: 0.8; transform: scale(0.98); }
 
-        /* Controle de Abas (30 dias vs Total) */
-        .segmented-control {
-            display: flex; background: #E5E5EA; padding: 3px; border-radius: 10px; margin-bottom: 20px;
+        /* LISTA E ROLAGEM */
+        .scroll-container {
+            max-height: 350px; overflow-y: auto; -webkit-overflow-scrolling: touch;
         }
-        .segment-btn {
-            flex: 1; padding: 8px; border: none; background: transparent;
-            font-size: 13px; font-weight: 500; border-radius: 8px; cursor: pointer;
-        }
-        .segment-btn.active { background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); font-weight: 600; }
 
-        /* Tabela de Extrato */
         table { width: 100%; border-collapse: collapse; }
         td { padding: 12px 0; border-bottom: 1px solid #F2F2F7; }
         .cat-icon { 
@@ -94,46 +106,36 @@
             text-align: center; line-height: 30px; margin-right: 10px; font-size: 14px;
         }
 
-        /* LEGENDA DETALHADA DO GRÁFICO */
-        .chart-legend { margin-top: 20px; border-top: 1px solid #F2F2F7; padding-top: 10px; }
-        .legend-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; font-size: 14px; }
-        .legend-left { display: flex; align-items: center; }
-        .color-dot { width: 10px; height: 10px; border-radius: 50%; margin-right: 10px; }
-        .legend-percent { font-weight: 600; color: var(--subtext); width: 45px; text-align: right; }
-        .legend-value { font-weight: 600; margin-left: 10px; min-width: 80px; text-align: right; }
-
-        /* Menu Inferior */
+        /* MENU INFERIOR (3 ITENS) */
         .nav-bar {
             position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-            width: 90%; max-width: 400px;
-            background: rgba(255,255,255,0.9); backdrop-filter: blur(10px);
-            display: flex; justify-content: space-around; padding: 12px 0;
-            border-radius: 25px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); z-index: 100;
+            width: 95%; max-width: 400px;
+            background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);
+            display: flex; justify-content: space-between; padding: 12px 0;
+            border-radius: 25px; box-shadow: 0 5px 25px rgba(0,0,0,0.15); z-index: 100;
         }
-        .nav-item { font-size: 12px; color: #C7C7CC; font-weight: 600; text-align: center; flex: 1; }
+        .nav-item { font-size: 11px; color: #C7C7CC; font-weight: 600; text-align: center; flex: 1; }
         .nav-item.active { color: var(--primary); }
-        .nav-icon { font-size: 22px; display: block; margin-bottom: 2px; }
+        .nav-icon { font-size: 24px; display: block; margin-bottom: 2px; }
 
+        /* Abas e Utilitarios */
         .tab-content { display: none; }
         .tab-content.active { display: block; animation: fadeIn 0.3s; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Modal */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); z-index: 200; display: none; align-items: center; justify-content: center;
-        }
-        .modal-content {
-            background: white; width: 85%; max-width: 350px; border-radius: 16px; padding: 20px; max-height: 80vh; overflow-y: auto;
-        }
+        /* Modal e Chart Legend (mantidos) */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 200; display: none; align-items: center; justify-content: center; }
+        .modal-content { background: white; width: 85%; max-width: 350px; border-radius: 16px; padding: 20px; max-height: 80vh; overflow-y: auto; }
         .cat-list-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; }
-        .delete-cat { color: var(--danger); font-weight: bold; padding: 5px 10px; cursor: pointer; }
+        .chart-legend { margin-top: 20px; border-top: 1px solid #F2F2F7; padding-top: 10px; }
+        .legend-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; font-size: 14px; }
+        .color-dot { width: 10px; height: 10px; border-radius: 50%; margin-right: 10px; }
     </style>
 </head>
 <body>
 
     <div id="tab-add" class="tab-content active">
-        <h2>Novo Gasto</h2>
+        <h2>Nova Despesa</h2>
         <div class="card">
             <label>Valor (R$)</label>
             <input type="number" id="amount" placeholder="0,00" step="0.01" inputmode="decimal">
@@ -145,25 +147,54 @@
             </div>
 
             <label>Descrição</label>
-            <input type="text" id="description" placeholder="Ex: Mercado da semana">
+            <input type="text" id="description" placeholder="Ex: Mercado">
 
-            <button class="btn-primary" onclick="addExpense()">Adicionar</button>
+            <button class="btn-primary" onclick="addExpense()">Registrar Saída</button>
+        </div>
+    </div>
+
+    <div id="tab-income" class="tab-content">
+        <h2>Novo Ganho</h2>
+        <div class="card">
+            <label>Valor recebido (R$)</label>
+            <input type="number" id="inc-amount" placeholder="0,00" step="0.01" inputmode="decimal">
+            
+            <label>Descrição</label>
+            <input type="text" id="inc-description" placeholder="Ex: Salário, Venda, Extra...">
+
+            <button class="btn-primary btn-success" onclick="addIncome()">Registrar Entrada</button>
+        </div>
+
+        <div class="card">
+            <h3>Entradas Recentes</h3>
+            <div class="scroll-container" style="max-height: 200px;">
+                <table id="income-table"><tbody></tbody></table>
+            </div>
         </div>
     </div>
 
     <div id="tab-report" class="tab-content">
-        <h2>Relatórios</h2>
-        <div class="segmented-control">
-            <button class="segment-btn" id="btn-month" onclick="setReportMode('month')">Últimos 30 Dias</button>
-            <button class="segment-btn active" id="btn-all" onclick="setReportMode('all')">Total Geral</button>
-        </div>
+        <h2>Relatório Mensal</h2>
         
-        <div class="card" style="text-align: center; padding: 30px 20px;">
-            <p style="margin:0; color:var(--subtext); font-size: 14px;">Gasto no Período</p>
-            <h1 id="total-display" style="margin:10px 0; font-size: 36px;">R$ 0,00</h1>
+        <div class="card">
+            <div class="dashboard-grid">
+                <div class="dash-item">
+                    <div class="dash-label">Entradas</div>
+                    <div class="dash-value val-green" id="dash-in">R$ 0,00</div>
+                </div>
+                <div class="dash-item">
+                    <div class="dash-label">Saídas</div>
+                    <div class="dash-value val-red" id="dash-out">R$ 0,00</div>
+                </div>
+                <div class="dash-item dash-total">
+                    <div class="dash-label">Saldo Atual</div>
+                    <div class="dash-value val-blue" id="dash-bal" style="font-size: 24px;">R$ 0,00</div>
+                </div>
+            </div>
         </div>
 
         <div class="card">
+            <h3>Gastos por Categoria</h3>
             <div style="max-width: 250px; margin: 0 auto;">
                 <canvas id="expenseChart"></canvas>
             </div>
@@ -171,216 +202,207 @@
         </div>
 
         <div class="card">
-            <h3 style="margin-top:0; font-size:16px;">Extrato Detalhado</h3>
-            <table id="expense-table"><tbody></tbody></table>
+            <h3>Extrato de Despesas</h3>
+            <div class="scroll-container">
+                <table id="expense-table"><tbody></tbody></table>
+            </div>
         </div>
 
-        <button onclick="clearData()" style="background: transparent; color: var(--danger); border: none; width: 100%; padding: 20px; font-weight: 600;">Zerar Tudo</button>
+        <button onclick="clearAllData()" style="background: transparent; color: var(--danger); border: none; width: 100%; padding: 20px; font-weight: 600;">Zerar Todos os Dados</button>
     </div>
 
     <nav class="nav-bar">
         <div class="nav-item active" onclick="switchTab('tab-add', this)">
-            <span class="nav-icon">➕</span> Inserir
+            <span class="nav-icon">💸</span>
+            Gastos
+        </div>
+        <div class="nav-item" onclick="switchTab('tab-income', this)">
+            <span class="nav-icon">💰</span>
+            Ganhos
         </div>
         <div class="nav-item" onclick="switchTab('tab-report', this)">
-            <span class="nav-icon">📊</span> Relatórios
+            <span class="nav-icon">📊</span>
+            Resumo
         </div>
     </nav>
 
     <div id="catModal" class="modal-overlay">
         <div class="modal-content">
-            <h3 style="margin-top:0">Gerenciar Categorias</h3>
+            <h3 style="margin-top:0">Categorias de Gasto</h3>
             <div style="display:flex; gap:10px; margin-bottom:15px;">
-                <input type="text" id="new-cat-input" placeholder="Nova Categoria..." style="margin-bottom:0">
-                <button onclick="addNewCategory()" style="background:var(--primary); color:white; border:none; border-radius:10px; width:50px; font-weight:bold;">OK</button>
+                <input type="text" id="new-cat-input" placeholder="Nova..." style="margin-bottom:0">
+                <button onclick="addNewCategory()" style="background:var(--primary); color:white; border:none; border-radius:10px; width:50px;">OK</button>
             </div>
             <div id="cat-list-container"></div>
-            <button onclick="closeCatModal()" style="margin-top:20px; width:100%; padding:15px; background:#E5E5EA; border:none; border-radius:10px; font-weight:600;">Fechar</button>
+            <button onclick="closeCatModal()" style="margin-top:20px; width:100%; padding:15px; background:#E5E5EA; border:none; border-radius:10px;">Fechar</button>
         </div>
     </div>
 
     <script>
         // --- DADOS ---
         let expenses = JSON.parse(localStorage.getItem('expenses')) || [];
+        let incomes = JSON.parse(localStorage.getItem('incomes')) || []; // NOVO
+        
         const defaultCats = ['🍔 Alimentação', '🚗 Transporte', '🏠 Moradia', '🎉 Lazer', '💊 Saúde', '💡 Outros'];
         let categories = JSON.parse(localStorage.getItem('categories')) || defaultCats;
+        
         let myChart = null;
-        let reportMode = 'all';
-
-        // Cores fixas para ficar consistente
-        const chartColors = ['#007AFF', '#34C759', '#FF9500', '#FF2D55', '#AF52DE', '#5856D6', '#A2845E', '#8E8E93', '#FFCC00', '#00C7BE'];
+        const chartColors = ['#007AFF', '#34C759', '#FF9500', '#FF2D55', '#AF52DE', '#5856D6', '#A2845E', '#8E8E93'];
 
         // --- FUNÇÕES DE CATEGORIA ---
-        function saveCategories() {
-            localStorage.setItem('categories', JSON.stringify(categories));
-            renderCategorySelect();
-        }
+        function saveCategories() { localStorage.setItem('categories', JSON.stringify(categories)); renderCategorySelect(); }
         function renderCategorySelect() {
             const select = document.getElementById('category');
             select.innerHTML = '';
             categories.forEach(cat => {
-                const option = document.createElement('option');
-                option.value = cat;
-                option.innerText = cat;
-                select.appendChild(option);
+                const opt = document.createElement('option');
+                opt.value = cat; opt.innerText = cat; select.appendChild(opt);
             });
         }
         function openCatModal() { document.getElementById('catModal').style.display = 'flex'; renderCatListModal(); }
         function closeCatModal() { document.getElementById('catModal').style.display = 'none'; }
         function renderCatListModal() {
-            const container = document.getElementById('cat-list-container');
-            container.innerHTML = '';
-            categories.forEach((cat, index) => {
-                container.innerHTML += `<div class="cat-list-item"><span>${cat}</span><span class="delete-cat" onclick="removeCategory(${index})">Excluir</span></div>`;
-            });
+            const c = document.getElementById('cat-list-container'); c.innerHTML = '';
+            categories.forEach((cat, i) => { c.innerHTML += `<div class="cat-list-item"><span>${cat}</span><span style="color:red" onclick="removeCategory(${i})">Excluir</span></div>`; });
         }
         function addNewCategory() {
-            const val = document.getElementById('new-cat-input').value.trim();
-            if(val) { categories.push(val); saveCategories(); renderCatListModal(); document.getElementById('new-cat-input').value=''; }
+            const v = document.getElementById('new-cat-input').value.trim();
+            if(v){ categories.push(v); saveCategories(); renderCatListModal(); document.getElementById('new-cat-input').value=''; }
         }
-        function removeCategory(index) {
-            if(confirm('Remover esta categoria?')) { categories.splice(index, 1); saveCategories(); renderCatListModal(); }
-        }
+        function removeCategory(i) { if(confirm('Remover?')) { categories.splice(i, 1); saveCategories(); renderCatListModal(); } }
 
         // --- FUNÇÕES PRINCIPAIS ---
-        function saveToLocal() { localStorage.setItem('expenses', JSON.stringify(expenses)); updateUI(); }
+        function saveData() {
+            localStorage.setItem('expenses', JSON.stringify(expenses));
+            localStorage.setItem('incomes', JSON.stringify(incomes));
+            updateUI();
+        }
 
         function addExpense() {
             const amount = parseFloat(document.getElementById('amount').value);
             const category = document.getElementById('category').value;
             const description = document.getElementById('description').value;
-            const emoji = Array.from(category)[0]; 
+            const emoji = Array.from(category)[0];
 
-            if (!amount || isNaN(amount)) { alert("Digite um valor válido"); return; }
+            if (!amount || isNaN(amount)) { alert("Valor inválido"); return; }
 
             expenses.unshift({ id: Date.now(), amount, category, emoji, description, date: new Date().toISOString() });
-            saveToLocal();
-            
-            document.getElementById('amount').value = '';
-            document.getElementById('description').value = '';
-            alert('Gasto salvo!');
+            saveData();
+            document.getElementById('amount').value = ''; document.getElementById('description').value = '';
+            alert('Despesa salva!');
         }
 
-        function deleteExpense(id) { if(confirm("Excluir item?")) { expenses = expenses.filter(e => e.id !== id); saveToLocal(); } }
-        function clearData() { if(confirm("Apagar TODO o histórico?")) { expenses = []; saveToLocal(); } }
+        // NOVA FUNÇÃO: ADICIONAR RECEITA
+        function addIncome() {
+            const amount = parseFloat(document.getElementById('inc-amount').value);
+            const description = document.getElementById('inc-description').value;
 
-        function setReportMode(mode) {
-            reportMode = mode;
-            document.getElementById('btn-all').className = mode === 'all' ? 'segment-btn active' : 'segment-btn';
-            document.getElementById('btn-month').className = mode === 'month' ? 'segment-btn active' : 'segment-btn';
-            updateUI();
+            if (!amount || isNaN(amount)) { alert("Valor inválido"); return; }
+
+            incomes.unshift({ id: Date.now(), amount, description, date: new Date().toISOString() });
+            saveData();
+            document.getElementById('inc-amount').value = ''; document.getElementById('inc-description').value = '';
+            alert('Ganho salvo!');
+        }
+
+        function deleteExpense(id) { if(confirm("Excluir despesa?")) { expenses = expenses.filter(e => e.id !== id); saveData(); } }
+        function deleteIncome(id) { if(confirm("Excluir receita?")) { incomes = incomes.filter(e => e.id !== id); saveData(); } }
+
+        function clearAllData() {
+            if(confirm("ATENÇÃO: Isso apagará TODOS os gastos e ganhos. Continuar?")) {
+                expenses = []; incomes = []; saveData();
+            }
         }
 
         function updateUI() {
-            let filteredData = expenses;
-            if (reportMode === 'month') {
-                const limitDate = new Date();
-                limitDate.setDate(limitDate.getDate() - 30);
-                filteredData = expenses.filter(e => new Date(e.date) >= limitDate);
-            }
-
-            const tbody = document.querySelector('#expense-table tbody');
-            tbody.innerHTML = '';
+            // Filtro de Mês Atual para o Dashboard (Opcional: Pode ser Geral. Aqui faremos Geral para simplificar a visualização do saldo acumulado)
+            // Se quiser filtrar por mês, teria que aplicar lógica de data aqui. Vamos manter Geral para Saldo.
             
-            let total = 0;
-            const categoryTotals = {};
+            // 1. Calcular Totais
+            const totalExp = expenses.reduce((acc, cur) => acc + cur.amount, 0);
+            const totalInc = incomes.reduce((acc, cur) => acc + cur.amount, 0);
+            const balance = totalInc - totalExp;
 
-            filteredData.forEach(exp => {
-                total += exp.amount;
-                if (!categoryTotals[exp.category]) categoryTotals[exp.category] = 0;
-                categoryTotals[exp.category] += exp.amount;
+            // 2. Atualizar Dashboard
+            document.getElementById('dash-in').innerText = `R$ ${totalInc.toFixed(2)}`;
+            document.getElementById('dash-out').innerText = `R$ ${totalExp.toFixed(2)}`;
+            const balEl = document.getElementById('dash-bal');
+            balEl.innerText = `R$ ${balance.toFixed(2)}`;
+            balEl.style.color = balance >= 0 ? 'var(--primary)' : 'var(--danger)';
 
-                const dateObj = new Date(exp.date);
-                const dateStr = `${dateObj.getDate()}/${dateObj.getMonth()+1}`;
+            // 3. Atualizar Tabela Despesas
+            const tbodyExp = document.querySelector('#expense-table tbody');
+            tbodyExp.innerHTML = '';
+            const catTotals = {};
 
-                tbody.innerHTML += `
-                <tr>
-                    <td>
-                        <div style="display:flex; align-items:center;">
-                            <span class="cat-icon">${exp.emoji || '💰'}</span>
-                            <div>
-                                <div style="font-weight:600; font-size:15px;">${exp.category}</div>
-                                <div style="font-size:12px; color:var(--subtext)">${dateStr} - ${exp.description}</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td style="text-align:right; font-weight:600;">R$ ${exp.amount.toFixed(2)}</td>
-                    <td style="width:30px; text-align:right;"><span onclick="deleteExpense(${exp.id})" style="color:#FF3B30; cursor:pointer;">&times;</span></td>
+            expenses.forEach(exp => {
+                if(!catTotals[exp.category]) catTotals[exp.category] = 0;
+                catTotals[exp.category] += exp.amount;
+
+                const d = new Date(exp.date);
+                const dStr = `${d.getDate()}/${d.getMonth()+1}`;
+                tbodyExp.innerHTML += `<tr>
+                    <td><div style="display:flex;align-items:center;"><span class="cat-icon">${exp.emoji}</span><div><div style="font-weight:600">${exp.category}</div><div style="font-size:12px;color:#888">${dStr} - ${exp.description}</div></div></div></td>
+                    <td style="text-align:right;font-weight:600;color:var(--danger)">- R$ ${exp.amount.toFixed(2)}</td>
+                    <td style="width:30px;text-align:right"><span onclick="deleteExpense(${exp.id})" style="color:#ccc;font-size:18px;">&times;</span></td>
                 </tr>`;
             });
 
-            document.getElementById('total-display').innerText = `R$ ${total.toFixed(2)}`;
-            renderChart(categoryTotals, total);
+            // 4. Atualizar Tabela Receitas (Na aba Ganhos)
+            const tbodyInc = document.querySelector('#income-table tbody');
+            tbodyInc.innerHTML = '';
+            incomes.forEach(inc => {
+                const d = new Date(inc.date);
+                const dStr = `${d.getDate()}/${d.getMonth()+1}`;
+                tbodyInc.innerHTML += `<tr>
+                    <td><div style="font-weight:600">${inc.description}</div><div style="font-size:12px;color:#888">${dStr}</div></td>
+                    <td style="text-align:right;font-weight:600;color:var(--success)">+ R$ ${inc.amount.toFixed(2)}</td>
+                    <td style="width:30px;text-align:right"><span onclick="deleteIncome(${inc.id})" style="color:#ccc;font-size:18px;">&times;</span></td>
+                </tr>`;
+            });
+
+            renderChart(catTotals, totalExp);
         }
 
-        function renderChart(dataObj, totalGeral) {
+        function renderChart(dataObj, total) {
             const ctx = document.getElementById('expenseChart').getContext('2d');
-            const legendContainer = document.getElementById('custom-legend');
-            
+            const leg = document.getElementById('custom-legend');
             if (myChart) myChart.destroy();
-            legendContainer.innerHTML = '';
+            leg.innerHTML = '';
 
-            const labels = Object.keys(dataObj);
-            const data = Object.values(dataObj);
+            const keys = Object.keys(dataObj);
+            if(keys.length === 0) return;
+            const vals = Object.values(dataObj);
             
-            if(labels.length === 0) return;
+            // Ordenar
+            const sorted = vals.map((v, i) => ({v, k: keys[i]})).sort((a,b) => b.v - a.v);
+            const sKeys = sorted.map(o => o.k);
+            const sVals = sorted.map(o => o.v);
+            const sColors = sKeys.map((_, i) => chartColors[i % chartColors.length]);
 
-            // Ordenar dados do maior para o menor para a legenda ficar bonita
-            const sortedIndices = data.map((val, i) => ({val, i})).sort((a,b) => b.val - a.val);
-            const sortedLabels = sortedIndices.map(item => labels[item.i]);
-            const sortedData = sortedIndices.map(item => data[item.i]);
-            // Ajustar cores para bater com a ordem
-            const sortedColors = sortedIndices.map((item, i) => chartColors[i % chartColors.length]);
-
-            // Criar a Legenda HTML Customizada
-            sortedLabels.forEach((label, i) => {
-                const val = sortedData[i];
-                const percent = totalGeral > 0 ? ((val / totalGeral) * 100).toFixed(1) + '%' : '0%';
-                
-                legendContainer.innerHTML += `
-                <div class="legend-item">
-                    <div class="legend-left">
-                        <div class="color-dot" style="background-color: ${sortedColors[i]}"></div>
-                        <span>${label}</span>
-                    </div>
-                    <div style="display:flex;">
-                        <span class="legend-percent">${percent}</span>
-                        <span class="legend-value">R$ ${val.toFixed(2)}</span>
-                    </div>
-                </div>`;
+            sKeys.forEach((k, i) => {
+                const perc = total > 0 ? ((sVals[i]/total)*100).toFixed(1)+'%' : '0%';
+                leg.innerHTML += `<div class="legend-item"><div style="display:flex;align-items:center"><div class="color-dot" style="background:${sColors[i]}"></div><span>${k}</span></div><div><span style="font-weight:600;color:#888;margin-right:10px">${perc}</span><span style="font-weight:600">R$ ${sVals[i].toFixed(2)}</span></div></div>`;
             });
 
             myChart = new Chart(ctx, {
                 type: 'doughnut',
-                data: {
-                    labels: sortedLabels,
-                    datasets: [{
-                        data: sortedData,
-                        backgroundColor: sortedColors,
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    cutout: '65%',
-                    plugins: {
-                        legend: { display: false }, // Desativa legenda padrão
-                        tooltip: { enabled: true }
-                    }
-                }
+                data: { labels: sKeys, datasets: [{ data: sVals, backgroundColor: sColors, borderWidth: 0 }] },
+                options: { responsive: true, cutout: '70%', plugins: { legend: { display: false } } }
             });
         }
 
-        function switchTab(tabId, element) {
+        function switchTab(id, el) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
-            element.classList.add('active');
-            if(tabId === 'tab-report') updateUI();
+            document.getElementById(id).classList.add('active');
+            el.classList.add('active');
+            if(id === 'tab-report' || id === 'tab-income') updateUI();
         }
 
+        // Iniciar
         renderCategorySelect();
-        setReportMode('month');
+        updateUI();
     </script>
 </body>
 </html>
