@@ -46,17 +46,7 @@
             margin-bottom: 20px;
         }
 
-        /* CONTROLO DE PERÍODO (VOLTOU) */
-        .segmented-control {
-            display: flex; background: #E5E5EA; padding: 3px; border-radius: 10px; margin-bottom: 20px;
-        }
-        .segment-btn {
-            flex: 1; padding: 8px; border: none; background: transparent;
-            font-size: 13px; font-weight: 500; border-radius: 8px; cursor: pointer;
-        }
-        .segment-btn.active { background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); font-weight: 600; }
-
-        /* DASHBOARD CARD */
+        /* DASHBOARD GRID */
         .dashboard-grid {
             display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;
         }
@@ -77,6 +67,11 @@
             background: var(--input-bg); border-radius: 12px; font-size: 17px;
             color: var(--text); box-sizing: border-box; outline: none; appearance: none;
         }
+        /* Estilo específico para o input de data */
+        input[type="month"] {
+            background: white; border: 1px solid #ddd; text-align: center; font-weight: bold; color: var(--primary);
+        }
+
         .select-container { display: flex; gap: 10px; align-items: center; margin-bottom: 20px; }
         .select-container select { margin-bottom: 0; }
         .config-btn {
@@ -93,7 +88,7 @@
         .btn-success { background-color: var(--success); }
         .btn-primary:active, .btn-success:active { opacity: 0.8; transform: scale(0.98); }
 
-        /* LISTAS E ROLAGEM */
+        /* LISTAS */
         .scroll-container { max-height: 350px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
         table { width: 100%; border-collapse: collapse; }
         td { padding: 12px 0; border-bottom: 1px solid #F2F2F7; }
@@ -103,30 +98,36 @@
             text-align: center; line-height: 30px; margin-right: 10px; font-size: 14px;
         }
 
-        /* MENU INFERIOR */
+        /* ELEMENTOS DE UI */
+        .segmented-control { display: flex; background: #E5E5EA; padding: 3px; border-radius: 10px; margin-bottom: 20px; }
+        .segment-btn { flex: 1; padding: 8px; border: none; background: transparent; font-size: 13px; font-weight: 500; border-radius: 8px; cursor: pointer; }
+        .segment-btn.active { background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); font-weight: 600; }
+        
+        .chart-legend { margin-top: 20px; border-top: 1px solid #F2F2F7; padding-top: 10px; }
+        .legend-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; font-size: 14px; }
+        .color-dot { width: 10px; height: 10px; border-radius: 50%; margin-right: 10px; }
+
+        /* MENU INFERIOR (4 ITENS) */
         .nav-bar {
             position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-            width: 95%; max-width: 400px;
+            width: 95%; max-width: 450px;
             background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);
             display: flex; justify-content: space-between; padding: 12px 0;
             border-radius: 25px; box-shadow: 0 5px 25px rgba(0,0,0,0.15); z-index: 100;
         }
-        .nav-item { font-size: 11px; color: #C7C7CC; font-weight: 600; text-align: center; flex: 1; }
+        .nav-item { font-size: 10px; color: #C7C7CC; font-weight: 600; text-align: center; flex: 1; }
         .nav-item.active { color: var(--primary); }
-        .nav-icon { font-size: 24px; display: block; margin-bottom: 2px; }
+        .nav-icon { font-size: 20px; display: block; margin-bottom: 4px; }
 
-        /* Abas e Utilitários */
+        /* Abas */
         .tab-content { display: none; }
         .tab-content.active { display: block; animation: fadeIn 0.3s; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Modal e Legenda */
+        /* Modal */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 200; display: none; align-items: center; justify-content: center; }
         .modal-content { background: white; width: 85%; max-width: 350px; border-radius: 16px; padding: 20px; max-height: 80vh; overflow-y: auto; }
         .cat-list-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; }
-        .chart-legend { margin-top: 20px; border-top: 1px solid #F2F2F7; padding-top: 10px; }
-        .legend-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; font-size: 14px; }
-        .color-dot { width: 10px; height: 10px; border-radius: 50%; margin-right: 10px; }
     </style>
 </head>
 <body>
@@ -136,16 +137,13 @@
         <div class="card">
             <label>Valor (R$)</label>
             <input type="number" id="amount" placeholder="0,00" step="0.01" inputmode="decimal">
-            
             <label>Categoria</label>
             <div class="select-container">
                 <select id="category"></select>
                 <button class="config-btn" onclick="openCatModal()">⚙️</button>
             </div>
-
             <label>Descrição</label>
             <input type="text" id="description" placeholder="Ex: Mercado">
-
             <button class="btn-primary" onclick="addExpense()">Registrar Saída</button>
         </div>
     </div>
@@ -153,12 +151,10 @@
     <div id="tab-income" class="tab-content">
         <h2>Novo Ganho</h2>
         <div class="card">
-            <label>Valor recebido (R$)</label>
+            <label>Valor (R$)</label>
             <input type="number" id="inc-amount" placeholder="0,00" step="0.01" inputmode="decimal">
-            
             <label>Descrição</label>
-            <input type="text" id="inc-description" placeholder="Ex: Salário, Venda...">
-
+            <input type="text" id="inc-description" placeholder="Ex: Salário...">
             <button class="btn-primary btn-success" onclick="addIncome()">Registrar Entrada</button>
         </div>
         <div class="card">
@@ -170,63 +166,74 @@
     </div>
 
     <div id="tab-report" class="tab-content">
-        <h2>Resumo Financeiro</h2>
-        
+        <h2>Resumo</h2>
         <div class="segmented-control">
             <button class="segment-btn active" id="btn-month" onclick="setReportMode('month')">Este Mês</button>
             <button class="segment-btn" id="btn-all" onclick="setReportMode('all')">Total Geral</button>
         </div>
-
         <div class="card">
             <div class="dashboard-grid">
-                <div class="dash-item">
-                    <div class="dash-label">Entradas</div>
-                    <div class="dash-value val-green" id="dash-in">R$ 0,00</div>
-                </div>
-                <div class="dash-item">
-                    <div class="dash-label">Saídas</div>
-                    <div class="dash-value val-red" id="dash-out">R$ 0,00</div>
-                </div>
-                <div class="dash-item dash-total">
-                    <div class="dash-label">Saldo do Período</div>
-                    <div class="dash-value val-blue" id="dash-bal" style="font-size: 24px;">R$ 0,00</div>
-                </div>
+                <div class="dash-item"><div class="dash-label">Entradas</div><div class="dash-value val-green" id="dash-in">R$ 0,00</div></div>
+                <div class="dash-item"><div class="dash-label">Saídas</div><div class="dash-value val-red" id="dash-out">R$ 0,00</div></div>
+                <div class="dash-item dash-total"><div class="dash-label">Saldo</div><div class="dash-value val-blue" id="dash-bal" style="font-size: 24px;">R$ 0,00</div></div>
             </div>
         </div>
-
         <div class="card">
             <h3>Gastos por Categoria</h3>
-            <div style="max-width: 250px; margin: 0 auto;">
-                <canvas id="expenseChart"></canvas>
-            </div>
+            <div style="max-width: 250px; margin: 0 auto;"><canvas id="expenseChart"></canvas></div>
             <div id="custom-legend" class="chart-legend"></div>
+        </div>
+        <div class="card">
+            <h3>Extrato</h3>
+            <div class="scroll-container"><table id="expense-table"><tbody></tbody></table></div>
+        </div>
+        <button onclick="clearAllData()" style="color: var(--danger); border: none; width: 100%; padding: 20px; font-weight: 600; background:transparent;">Zerar Tudo</button>
+    </div>
+
+    <div id="tab-history" class="tab-content">
+        <h2>Histórico</h2>
+        
+        <div class="card" style="text-align:center;">
+            <label style="margin-bottom:5px;">Selecione o Mês</label>
+            <input type="month" id="history-month" onchange="updateHistoryUI()" style="margin-bottom:0; font-size:18px;">
         </div>
 
         <div class="card">
-            <h3>Extrato de Despesas</h3>
-            <div class="scroll-container">
-                <table id="expense-table"><tbody></tbody></table>
+            <h3 style="text-align:center; margin-bottom:15px;">Resumo do Mês</h3>
+            <div class="dashboard-grid">
+                <div class="dash-item"><div class="dash-label">Ganho</div><div class="dash-value val-blue" id="hist-in">R$ 0,00</div></div>
+                <div class="dash-item"><div class="dash-label">Gasto</div><div class="dash-value val-red" id="hist-out">R$ 0,00</div></div>
+                <div class="dash-item dash-total"><div class="dash-label">Saldo</div><div class="dash-value" id="hist-bal" style="font-size: 20px;">R$ 0,00</div></div>
             </div>
         </div>
-        
-        <button onclick="clearAllData()" style="background: transparent; color: var(--danger); border: none; width: 100%; padding: 20px; font-weight: 600;">Zerar Todos os Dados</button>
+
+        <div class="card">
+            <h3>Tendência (±6 Meses)</h3>
+            <canvas id="historyChart"></canvas>
+            <div style="margin-top:10px; font-size:12px; color:#888; text-align:center;">
+                <span style="color:#007AFF">● Receitas</span> &nbsp;&nbsp; <span style="color:#FF3B30">● Despesas</span>
+            </div>
+        </div>
     </div>
 
     <nav class="nav-bar">
         <div class="nav-item active" onclick="switchTab('tab-add', this)">
-            <span class="nav-icon">💸</span> Gastos
+            <span class="nav-icon">💸</span>Gastos
         </div>
         <div class="nav-item" onclick="switchTab('tab-income', this)">
-            <span class="nav-icon">💰</span> Ganhos
+            <span class="nav-icon">💰</span>Ganhos
         </div>
         <div class="nav-item" onclick="switchTab('tab-report', this)">
-            <span class="nav-icon">📊</span> Resumo
+            <span class="nav-icon">📊</span>Resumo
+        </div>
+        <div class="nav-item" onclick="switchTab('tab-history', this)">
+            <span class="nav-icon">📅</span>Hist.
         </div>
     </nav>
 
     <div id="catModal" class="modal-overlay">
         <div class="modal-content">
-            <h3 style="margin-top:0">Categorias de Gasto</h3>
+            <h3 style="margin-top:0">Categorias</h3>
             <div style="display:flex; gap:10px; margin-bottom:15px;">
                 <input type="text" id="new-cat-input" placeholder="Nova..." style="margin-bottom:0">
                 <button onclick="addNewCategory()" style="background:var(--primary); color:white; border:none; border-radius:10px; width:50px;">OK</button>
@@ -240,14 +247,28 @@
         // --- DADOS ---
         let expenses = JSON.parse(localStorage.getItem('expenses')) || [];
         let incomes = JSON.parse(localStorage.getItem('incomes')) || [];
-        let reportMode = 'month'; // 'month' ou 'all'
         
-        const defaultCats = ['🍔 Alimentação', '🚗 Transporte', '🏠 Moradia', '🎉 Lazer', '💊 Saúde', '💡 Outros'];
-        let categories = JSON.parse(localStorage.getItem('categories')) || defaultCats;
-        let myChart = null;
+        let categories = JSON.parse(localStorage.getItem('categories')) || ['🍔 Alimentação', '🚗 Transporte', '🏠 Moradia', '🎉 Lazer', '💊 Saúde', '💡 Outros'];
+        
+        let expenseChart = null;
+        let historyChart = null;
+        let reportMode = 'month';
+
         const chartColors = ['#007AFF', '#34C759', '#FF9500', '#FF2D55', '#AF52DE', '#5856D6', '#A2845E', '#8E8E93'];
 
-        // --- FUNÇÕES DE CATEGORIA ---
+        // --- INICIALIZAÇÃO ---
+        window.onload = function() {
+            renderCategorySelect();
+            setReportMode('month');
+            
+            // Define mês atual no input de histórico
+            const now = new Date();
+            const yyyy = now.getFullYear();
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            document.getElementById('history-month').value = `${yyyy}-${mm}`;
+        };
+
+        // --- CATEGORIAS ---
         function saveCategories() { localStorage.setItem('categories', JSON.stringify(categories)); renderCategorySelect(); }
         function renderCategorySelect() {
             const select = document.getElementById('category'); select.innerHTML = '';
@@ -265,115 +286,91 @@
         }
         function removeCategory(i) { if(confirm('Remover?')) { categories.splice(i, 1); saveCategories(); renderCatListModal(); } }
 
-        // --- FUNÇÕES PRINCIPAIS ---
-        function saveData() {
-            localStorage.setItem('expenses', JSON.stringify(expenses));
-            localStorage.setItem('incomes', JSON.stringify(incomes));
-            updateUI();
-        }
-
+        // --- CRUD ---
+        function saveData() { localStorage.setItem('expenses', JSON.stringify(expenses)); localStorage.setItem('incomes', JSON.stringify(incomes)); updateReportUI(); }
+        
         function addExpense() {
             const amount = parseFloat(document.getElementById('amount').value);
             const category = document.getElementById('category').value;
             const description = document.getElementById('description').value;
-            const emoji = Array.from(category)[0];
-            if (!amount || isNaN(amount)) { alert("Valor inválido"); return; }
-            expenses.unshift({ id: Date.now(), amount, category, emoji, description, date: new Date().toISOString() });
+            if (!amount) return alert("Valor inválido");
+            expenses.unshift({ id: Date.now(), amount, category, emoji: Array.from(category)[0], description, date: new Date().toISOString() });
             saveData();
             document.getElementById('amount').value = ''; document.getElementById('description').value = '';
-            alert('Despesa salva!');
+            alert('Saída salva!');
         }
 
         function addIncome() {
             const amount = parseFloat(document.getElementById('inc-amount').value);
             const description = document.getElementById('inc-description').value;
-            if (!amount || isNaN(amount)) { alert("Valor inválido"); return; }
+            if (!amount) return alert("Valor inválido");
             incomes.unshift({ id: Date.now(), amount, description, date: new Date().toISOString() });
             saveData();
             document.getElementById('inc-amount').value = ''; document.getElementById('inc-description').value = '';
-            alert('Ganho salvo!');
+            alert('Entrada salva!');
         }
 
         function deleteExpense(id) { if(confirm("Excluir?")) { expenses = expenses.filter(e => e.id !== id); saveData(); } }
         function deleteIncome(id) { if(confirm("Excluir?")) { incomes = incomes.filter(e => e.id !== id); saveData(); } }
         function clearAllData() { if(confirm("Apagar TUDO?")) { expenses = []; incomes = []; saveData(); } }
 
-        // --- LÓGICA DE RELATÓRIO ---
+        // --- RELATÓRIO (ABA 3) ---
         function setReportMode(mode) {
             reportMode = mode;
             document.getElementById('btn-all').className = mode === 'all' ? 'segment-btn active' : 'segment-btn';
             document.getElementById('btn-month').className = mode === 'month' ? 'segment-btn active' : 'segment-btn';
-            updateUI();
+            updateReportUI();
         }
 
-        function filterByDate(dataArray) {
-            if (reportMode === 'all') return dataArray;
-            const now = new Date();
-            const currentMonth = now.getMonth();
-            const currentYear = now.getFullYear();
+        function updateReportUI() {
+            const filterFn = (item) => {
+                if (reportMode === 'all') return true;
+                const d = new Date(item.date); const now = new Date();
+                return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+            };
             
-            return dataArray.filter(item => {
-                const d = new Date(item.date);
-                return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
-            });
-        }
+            const filteredExp = expenses.filter(filterFn);
+            const filteredInc = incomes.filter(filterFn);
 
-        function updateUI() {
-            // 1. Filtrar dados com base no modo (Este Mês ou Total)
-            const filteredExpenses = filterByDate(expenses);
-            const filteredIncomes = filterByDate(incomes);
+            const totalExp = filteredExp.reduce((a, b) => a + b.amount, 0);
+            const totalInc = filteredInc.reduce((a, b) => a + b.amount, 0);
+            const bal = totalInc - totalExp;
 
-            // 2. Calcular Totais
-            const totalExp = filteredExpenses.reduce((acc, cur) => acc + cur.amount, 0);
-            const totalInc = filteredIncomes.reduce((acc, cur) => acc + cur.amount, 0);
-            const balance = totalInc - totalExp;
-
-            // 3. Atualizar Dashboard
             document.getElementById('dash-in').innerText = `R$ ${totalInc.toFixed(2)}`;
             document.getElementById('dash-out').innerText = `R$ ${totalExp.toFixed(2)}`;
             const balEl = document.getElementById('dash-bal');
-            balEl.innerText = `R$ ${balance.toFixed(2)}`;
-            balEl.style.color = balance >= 0 ? 'var(--primary)' : 'var(--danger)';
+            balEl.innerText = `R$ ${bal.toFixed(2)}`;
+            balEl.style.color = bal >= 0 ? 'var(--primary)' : 'var(--danger)';
 
-            // 4. Tabela Despesas (Filtrada)
-            const tbodyExp = document.querySelector('#expense-table tbody');
-            tbodyExp.innerHTML = '';
+            // Tabela Despesas
+            const tbodyExp = document.querySelector('#expense-table tbody'); tbodyExp.innerHTML = '';
             const catTotals = {};
-
-            filteredExpenses.forEach(exp => {
-                if(!catTotals[exp.category]) catTotals[exp.category] = 0;
-                catTotals[exp.category] += exp.amount;
-                const d = new Date(exp.date);
-                const dStr = `${d.getDate()}/${d.getMonth()+1}`;
-                tbodyExp.innerHTML += `<tr><td><div style="display:flex;align-items:center;"><span class="cat-icon">${exp.emoji}</span><div><div style="font-weight:600">${exp.category}</div><div style="font-size:12px;color:#888">${dStr} - ${exp.description}</div></div></div></td><td style="text-align:right;font-weight:600;color:var(--danger)">- R$ ${exp.amount.toFixed(2)}</td><td style="width:30px;text-align:right"><span onclick="deleteExpense(${exp.id})" style="color:#ccc;font-size:18px;">&times;</span></td></tr>`;
+            filteredExp.forEach(e => {
+                if(!catTotals[e.category]) catTotals[e.category] = 0; catTotals[e.category] += e.amount;
+                const d = new Date(e.date);
+                tbodyExp.innerHTML += `<tr><td><div style="display:flex;align-items:center;"><span class="cat-icon">${e.emoji}</span><div><div style="font-weight:600">${e.category}</div><div style="font-size:12px;color:#888">${d.getDate()}/${d.getMonth()+1} - ${e.description}</div></div></div></td><td style="text-align:right;font-weight:600;color:var(--danger)">- R$ ${e.amount.toFixed(2)}</td><td style="width:30px;text-align:right"><span onclick="deleteExpense(${e.id})" style="color:#ccc;font-size:18px;">&times;</span></td></tr>`;
             });
 
-            // 5. Tabela Receitas (Aba Ganhos - Mostrar todas ou só do mês? Vamos mostrar todas recentes na aba de inserção, mas o dashboard respeita o filtro)
-            const tbodyInc = document.querySelector('#income-table tbody');
-            tbodyInc.innerHTML = '';
-            // Nota: Na aba "Novo Ganho", mostramos sempre as recentes independentemente do filtro do relatório
-            incomes.slice(0, 50).forEach(inc => {
-                const d = new Date(inc.date);
-                const dStr = `${d.getDate()}/${d.getMonth()+1}`;
-                tbodyInc.innerHTML += `<tr><td><div style="font-weight:600">${inc.description}</div><div style="font-size:12px;color:#888">${dStr}</div></td><td style="text-align:right;font-weight:600;color:var(--success)">+ R$ ${inc.amount.toFixed(2)}</td><td style="width:30px;text-align:right"><span onclick="deleteIncome(${inc.id})" style="color:#ccc;font-size:18px;">&times;</span></td></tr>`;
+            // Tabela Incomes (Recentes)
+            const tbodyInc = document.querySelector('#income-table tbody'); tbodyInc.innerHTML = '';
+            incomes.slice(0, 50).forEach(i => {
+                const d = new Date(i.date);
+                tbodyInc.innerHTML += `<tr><td><div style="font-weight:600">${i.description}</div><div style="font-size:12px;color:#888">${d.getDate()}/${d.getMonth()+1}</div></td><td style="text-align:right;font-weight:600;color:var(--success)">+ R$ ${i.amount.toFixed(2)}</td><td style="width:30px;text-align:right"><span onclick="deleteIncome(${i.id})" style="color:#ccc;font-size:18px;">&times;</span></td></tr>`;
             });
 
-            renderChart(catTotals, totalExp);
+            renderPieChart(catTotals, totalExp);
         }
 
-        function renderChart(dataObj, total) {
+        function renderPieChart(data, total) {
             const ctx = document.getElementById('expenseChart').getContext('2d');
             const leg = document.getElementById('custom-legend');
-            if (myChart) myChart.destroy();
+            if (expenseChart) expenseChart.destroy();
             leg.innerHTML = '';
-
-            const keys = Object.keys(dataObj);
+            const keys = Object.keys(data);
             if(keys.length === 0) return;
-            const vals = Object.values(dataObj);
             
-            const sorted = vals.map((v, i) => ({v, k: keys[i]})).sort((a,b) => b.v - a.v);
-            const sKeys = sorted.map(o => o.k);
-            const sVals = sorted.map(o => o.v);
+            const sorted = Object.values(data).map((v, i) => ({v, k: keys[i]})).sort((a,b) => b.v - a.v);
+            const sKeys = sorted.map(o => o.k); const sVals = sorted.map(o => o.v);
             const sColors = sKeys.map((_, i) => chartColors[i % chartColors.length]);
 
             sKeys.forEach((k, i) => {
@@ -381,10 +378,100 @@
                 leg.innerHTML += `<div class="legend-item"><div style="display:flex;align-items:center"><div class="color-dot" style="background:${sColors[i]}"></div><span>${k}</span></div><div><span style="font-weight:600;color:#888;margin-right:10px">${perc}</span><span style="font-weight:600">R$ ${sVals[i].toFixed(2)}</span></div></div>`;
             });
 
-            myChart = new Chart(ctx, {
+            expenseChart = new Chart(ctx, {
                 type: 'doughnut',
                 data: { labels: sKeys, datasets: [{ data: sVals, backgroundColor: sColors, borderWidth: 0 }] },
                 options: { responsive: true, cutout: '70%', plugins: { legend: { display: false } } }
+            });
+        }
+
+        // --- HISTÓRICO (ABA 4 - NOVO) ---
+        function getMonthlyTotals(year, month) {
+            const filter = (item) => {
+                const d = new Date(item.date);
+                // Ajuste de fuso horário simples: usa getMonth/Year local
+                return d.getFullYear() === year && d.getMonth() === month;
+            };
+            const e = expenses.filter(filter).reduce((a,b)=>a+b.amount,0);
+            const i = incomes.filter(filter).reduce((a,b)=>a+b.amount,0);
+            return { exp: e, inc: i, bal: i - e };
+        }
+
+        function updateHistoryUI() {
+            const inputVal = document.getElementById('history-month').value; // Formato "YYYY-MM"
+            if(!inputVal) return;
+            
+            const [selYear, selMonth] = inputVal.split('-').map(Number);
+            const monthIndex = selMonth - 1; // JS conta meses de 0 a 11
+
+            // 1. Cards do Mês Selecionado
+            const currentData = getMonthlyTotals(selYear, monthIndex);
+            document.getElementById('hist-in').innerText = `R$ ${currentData.inc.toFixed(2)}`;
+            document.getElementById('hist-out').innerText = `R$ ${currentData.exp.toFixed(2)}`;
+            const balEl = document.getElementById('hist-bal');
+            balEl.innerText = `R$ ${currentData.bal.toFixed(2)}`;
+            balEl.style.color = currentData.bal >= 0 ? '#007AFF' : '#FF3B30';
+
+            // 2. Gráfico de Tendência (6 meses antes e 6 depois)
+            renderHistoryChart(selYear, monthIndex);
+        }
+
+        function renderHistoryChart(centerYear, centerMonth) {
+            const ctx = document.getElementById('historyChart').getContext('2d');
+            if(historyChart) historyChart.destroy();
+
+            const labels = [];
+            const dataInc = [];
+            const dataExp = [];
+
+            // Loop de -6 a +6
+            for (let i = -6; i <= 6; i++) {
+                const d = new Date(centerYear, centerMonth + i, 1);
+                const y = d.getFullYear();
+                const m = d.getMonth();
+                const totals = getMonthlyTotals(y, m);
+                
+                // Nome do mês curto (Ex: Jan)
+                const monthName = d.toLocaleDateString('pt-BR', { month: 'short' }).replace('.','');
+                
+                labels.push(monthName);
+                dataInc.push(totals.inc);
+                dataExp.push(totals.exp);
+            }
+
+            historyChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Ganhos',
+                            data: dataInc,
+                            borderColor: '#007AFF', // Azul
+                            backgroundColor: 'rgba(0,122,255,0.1)',
+                            borderWidth: 2,
+                            tension: 0.3,
+                            pointRadius: 2
+                        },
+                        {
+                            label: 'Gastos',
+                            data: dataExp,
+                            borderColor: '#FF3B30', // Vermelho
+                            backgroundColor: 'rgba(255,59,48,0.1)',
+                            borderWidth: 2,
+                            tension: 0.3,
+                            pointRadius: 2
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#f0f0f0' } },
+                        x: { grid: { display: false } }
+                    }
+                }
             });
         }
 
@@ -393,11 +480,10 @@
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             el.classList.add('active');
-            if(id === 'tab-report' || id === 'tab-income') updateUI();
+            
+            if(id === 'tab-report') updateReportUI();
+            if(id === 'tab-history') updateHistoryUI();
         }
-
-        renderCategorySelect();
-        setReportMode('month');
     </script>
 </body>
 </html>
